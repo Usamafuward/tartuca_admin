@@ -85,7 +85,10 @@ export const updateOrderStatus = async (orderId, status) => {
             },
             body: JSON.stringify({ status })
         });
-        if (!response.ok) throw new Error('Failed to update order status');
+        if (!response.ok) {
+            const errData = await response.json().catch(() => ({}));
+            throw new Error(errData.detail || 'Failed to update order status');
+        }
         return await response.json();
     } catch (error) {
         console.error('Error updating order status:', error);

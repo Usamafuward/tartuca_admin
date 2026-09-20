@@ -29,7 +29,51 @@ const Orders = () => {
     loadOrders();
   }, [showToast]);
 
+  const getAvailableStatusOptions = (currentStatus) => {
+    switch (currentStatus) {
+      case 'cooking':
+        return [
+          { value: 'cooking', label: 'Cooking' },
+          { value: 'delivered', label: 'Delivered' },
+          { value: 'cancelled', label: 'Cancelled' },
+        ];
+      case 'delivered':
+        return [
+          { value: 'delivered', label: 'Delivered' },
+          { value: 'cancelled', label: 'Cancelled' },
+        ];
+      case 'cancelled':
+        return [
+          { value: 'cancelled', label: 'Cancelled' },
+        ];
+      case 'pending':
+      default:
+        return [
+          { value: 'pending', label: 'Pending' },
+          { value: 'cooking', label: 'Cooking' },
+          { value: 'delivered', label: 'Delivered' },
+          { value: 'cancelled', label: 'Cancelled' },
+        ];
+    }
+  };
+
   const handleStatusChange = async (orderId, newStatus) => {
+    const currentOrder = orders.find(o => o.id === orderId);
+    if (!currentOrder || currentOrder.status === newStatus) return;
+
+    if (currentOrder.status === 'cancelled') {
+      showToast("Cancelled orders cannot be changed to any status", 'error');
+      return;
+    }
+    if (currentOrder.status === 'cooking' && newStatus === 'pending') {
+      showToast("Cooking orders cannot be changed back to pending", 'error');
+      return;
+    }
+    if (currentOrder.status === 'delivered' && (newStatus === 'pending' || newStatus === 'cooking')) {
+      showToast("Delivered orders cannot be changed back to pending or cooking", 'error');
+      return;
+    }
+
     setUpdating(orderId);
     try {
         await updateOrderStatus(orderId, newStatus);
@@ -41,8 +85,8 @@ const Orders = () => {
             setSelectedOrder({ ...selectedOrder, status: newStatus });
         }
         showToast(`Order #${orderId} status updated to ${newStatus}`, 'success');
-    } catch {
-        showToast("Failed to update status", 'error');
+    } catch (error) {
+        showToast(error.message || "Failed to update status", 'error');
     } finally {
         setUpdating(null);
     }
@@ -180,8 +224,10 @@ const Orders = () => {
                           </button>
                           <div className="relative">
                               <select 
-                                  disabled={updating === order.id}
-                                  className={`text-sm border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none bg-white font-medium ${
+                                  disabled={updating === order.id || order.status === 'cancelled'}
+                                  className={`text-sm border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none bg-white font-medium ${
+                                      order.status === 'cancelled' ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
+                                  } ${
                                       order.status === 'pending' ? 'text-yellow-700 bg-yellow-50 border-yellow-200' :
                                       order.status === 'cooking' ? 'text-blue-700 bg-blue-50 border-blue-200' :
                                       order.status === 'delivered' ? 'text-green-700 bg-green-50 border-green-200' :
@@ -189,11 +235,11 @@ const Orders = () => {
                                   }`}
                                   value={order.status}
                                   onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                  title={order.status === 'cancelled' ? 'Cancelled orders cannot be modified' : 'Change order status'}
                               >
-                                  <option value="pending">Pending</option>
-                                  <option value="cooking">Cooking</option>
-                                  <option value="delivered">Delivered</option>
-                                  <option value="cancelled">Cancelled</option>
+                                  {getAvailableStatusOptions(order.status).map(opt => (
+                                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                  ))}
                               </select>
                               <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" size={14} />
                           </div>
@@ -235,7 +281,9 @@ const Orders = () => {
                             <p className="text-xs text-gray-500 uppercase font-bold mb-1">Update Status</p>
                             <div className="relative">
                                 <select 
-                                    className={`text-sm border rounded-xl pl-3 pr-10 py-2 font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none cursor-pointer w-full ${
+                                    className={`text-sm border rounded-xl pl-3 pr-10 py-2 font-semibold focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all appearance-none w-full ${
+                                        selectedOrder.status === 'cancelled' ? 'cursor-not-allowed opacity-80' : 'cursor-pointer'
+                                    } ${
                                         selectedOrder.status === 'pending' ? 'text-yellow-700 bg-yellow-50 border-yellow-200' :
                                         selectedOrder.status === 'cooking' ? 'text-blue-700 bg-blue-50 border-blue-200' :
                                         selectedOrder.status === 'delivered' ? 'text-green-700 bg-green-50 border-green-200' :
@@ -243,12 +291,12 @@ const Orders = () => {
                                     }`}
                                     value={selectedOrder.status}
                                     onChange={(e) => handleStatusChange(selectedOrder.id, e.target.value)}
-                                    disabled={updating === selectedOrder.id}
+                                    disabled={updating === selectedOrder.id || selectedOrder.status === 'cancelled'}
+                                    title={selectedOrder.status === 'cancelled' ? 'Cancelled orders cannot be modified' : 'Change order status'}
                                 >
-                                    <option value="pending">Pending</option>
-                                    <option value="cooking">Cooking</option>
-                                    <option value="delivered">Delivered</option>
-                                    <option value="cancelled">Cancelled</option>
+                                    {getAvailableStatusOptions(selectedOrder.status).map(opt => (
+                                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                    ))}
                                 </select>
                                 <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" size={16} />
                             </div>
