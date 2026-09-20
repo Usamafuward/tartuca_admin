@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Search, Filter, Clock, CheckCircle, Truck, XCircle, MoreVertical, Eye, X, ChevronDown } from 'lucide-react';
 import { fetchOrders, updateOrderStatus } from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { OrdersTableSkeleton } from '../components/common/Skeleton';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -193,7 +194,9 @@ const Orders = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredOrders.length === 0 ? (
+              {loading ? (
+                <OrdersTableSkeleton rows={7} />
+              ) : filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-6 py-8 text-center text-gray-400">
                     No orders match your criteria.

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Calendar, Users, Clock, Mail, Phone, Check, X, Search, Filter, RefreshCw, CheckCircle2 } from 'lucide-react';
 import { fetchReservations, updateReservationStatus } from '../services/api';
 import { useToast } from '../context/ToastContext';
+import { ReservationsSkeleton } from '../components/common/Skeleton';
 
 const Reservations = () => {
   const [reservations, setReservations] = useState([]);
@@ -116,7 +117,9 @@ const Reservations = () => {
         </div>
       </div>
 
-      {filteredReservations.length === 0 ? (
+      {loading ? (
+        <ReservationsSkeleton count={6} />
+      ) : filteredReservations.length === 0 ? (
         <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center text-gray-400">
           <Calendar size={48} className="mx-auto mb-3 opacity-30" />
           <p className="text-lg font-medium">No reservations found</p>

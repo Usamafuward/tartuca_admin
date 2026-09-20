@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, X } from 'lucide-react';
 import { fetchSpecialOffers, createSpecialOffer, deleteSpecialOffer, updateSpecialOffer, API_URL } from '../services/api';
+import { SpecialOffersSkeleton } from '../components/common/Skeleton';
 
 const SpecialOffers = () => {
   const [offers, setOffers] = useState([]);
@@ -302,7 +303,7 @@ const SpecialOffers = () => {
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-gray-500">Loading offers...</div>
+          <SpecialOffersSkeleton count={6} />
         ) : filteredOffers.length === 0 ? (
           <div className="text-center py-12 text-gray-500">
             {searchQuery || statusFilter !== 'all' ? 'No offers match your search criteria.' : 'No special offers yet. Create your first offer!'}

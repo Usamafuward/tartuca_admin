@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, X, Layers, Tag } from 'lucide-react';
 import { fetchMenuItems, fetchCategories, createMenuItem, updateMenuItem, deleteMenuItem, createCategory, deleteCategory, API_URL } from '../services/api';
+import { MenuTableSkeleton } from '../components/common/Skeleton';
 
 const Menu = () => {
   const [items, setItems] = useState([]);
@@ -444,7 +445,9 @@ const Menu = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredItems.length === 0 ? (
+              {loading ? (
+                <MenuTableSkeleton rows={6} />
+              ) : filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
                     No menu items found.

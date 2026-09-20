@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Star, MessageSquare, ThumbsUp, Check, X } from 'lucide-react';
 import { fetchReviews, approveReview } from '../services/api';
+import { ReviewsSkeleton } from '../components/common/Skeleton';
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -95,7 +96,7 @@ const Reviews = () => {
       </div>
 
       {loading ? (
-        <div className="text-center py-16 text-gray-500">Loading reviews...</div>
+        <ReviewsSkeleton count={4} />
       ) : filteredReviews.length === 0 ? (
         <div className="text-center py-16 bg-white rounded-xl border border-gray-100 text-gray-500">
           No reviews match your filters.

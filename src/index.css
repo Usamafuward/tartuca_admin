@@ -10,6 +10,17 @@
   --color-gray-light: #F9FAFB;
   --color-gray: #6B7280;
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  --animate-shimmer: shimmer 1.5s infinite;
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
 }
 
 

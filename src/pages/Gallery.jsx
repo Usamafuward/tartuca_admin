@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit, Trash2, Search, Filter, X } from 'lucide-react';
 import { fetchGallery, createGalleryImage, deleteGalleryImage, API_URL } from '../services/api';
+import { GallerySkeleton } from '../components/common/Skeleton';
 
 const Gallery = () => {
   const [images, setImages] = useState([]);
@@ -82,7 +83,7 @@ const Gallery = () => {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0 w-full">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-dark">Gallery Management</h1>
@@ -235,28 +236,40 @@ const Gallery = () => {
         </div>
       )}
 
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden min-w-0 w-full">
         {/* Filters */}
-        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 justify-between items-center">
-          <div className="relative flex-1 w-full">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+        <div className="p-4 sm:p-5 border-b border-gray-100 space-y-3.5">
+          {/* Search bar */}
+          <div className="relative w-full max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <input
               type="text"
               placeholder="Search gallery by title or category..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              className="w-full pl-9 pr-8 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-md transition-colors"
+                title="Clear search"
+              >
+                <X size={15} />
+              </button>
+            )}
           </div>
-          <div className="flex items-center gap-2 overflow-x-auto w-full sm:w-auto pb-1 sm:pb-0">
+
+          {/* Categories underneath search bar */}
+          <div className="flex flex-wrap items-center gap-2">
             {categories.map(cat => (
               <button
                 key={cat}
                 onClick={() => setSelectedCategory(cat)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize whitespace-nowrap transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold capitalize transition-all ${
                   selectedCategory.toLowerCase() === cat.toLowerCase()
                     ? 'bg-primary text-white shadow-sm'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-dark'
                 }`}
               >
                 {cat}
@@ -267,13 +280,13 @@ const Gallery = () => {
 
         {/* Grid View for Gallery */}
         {loading ? (
-          <div className="text-center py-16 text-gray-500">Loading gallery photos...</div>
+          <GallerySkeleton count={8} />
         ) : filteredImages.length === 0 ? (
           <div className="text-center py-16 text-gray-500">
             {searchQuery || selectedCategory !== 'all' ? 'No images match your search criteria.' : 'No gallery photos yet. Add your first photo!'}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
             {filteredImages.map((img) => (
               <div 
                 key={img.id} 

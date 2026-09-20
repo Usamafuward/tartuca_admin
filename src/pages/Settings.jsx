@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Save, LogOut, UserPlus, CheckCircle, AlertCircle, Store } from 'lucide-react';
 import { createAdmin, fetchRestaurantSettings, updateRestaurantSettings } from '../services/api';
+import { SettingsSkeleton } from '../components/common/Skeleton';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -111,7 +112,10 @@ const Settings = () => {
       </div>
 
       {/* Restaurant Information */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
+      {settingsLoading ? (
+        <SettingsSkeleton />
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
         <div className="flex items-center gap-3 mb-6">
           <div className="p-2 bg-primary/10 text-primary rounded-lg">
             <Store size={22} />
@@ -250,6 +254,7 @@ const Settings = () => {
           </div>
         </form>
       </div>
+      )}
 
       {/* Create New Admin */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
