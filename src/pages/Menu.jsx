@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Search, Filter, X } from 'lucide-react';
-import { fetchMenuItems, fetchCategories, createMenuItem, updateMenuItem, deleteMenuItem, API_URL } from '../services/api';
+import { Plus, Edit, Trash2, Search, Filter, X, Layers, Tag } from 'lucide-react';
+import { fetchMenuItems, fetchCategories, createMenuItem, updateMenuItem, deleteMenuItem, createCategory, deleteCategory, API_URL } from '../services/api';
 
 const Menu = () => {
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState('');
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
 
   const [newItem, setNewItem] = useState({
     name: '',
@@ -128,17 +133,58 @@ const Menu = () => {
     }
   };
 
+  const handleAddCategory = async (e) => {
+    e.preventDefault();
+    if (!newCategoryName.trim()) return;
+    try {
+      const slug = newCategoryName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+      await createCategory({ name: newCategoryName.trim(), slug: slug, display_order: categories.length + 1 });
+      setNewCategoryName('');
+      loadData();
+    } catch (error) {
+      alert('Failed to create category');
+    }
+  };
+
+  const handleDeleteCategory = async (catId) => {
+    if (window.confirm('Delete this category? Items in this category will not be deleted.')) {
+      try {
+        await deleteCategory(catId);
+        loadData();
+      } catch (error) {
+        alert('Failed to delete category');
+      }
+    }
+  };
+
+  const filteredItems = items.filter(item => {
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q || item.name.toLowerCase().includes(q) || (item.description && item.description.toLowerCase().includes(q));
+    const matchesCategory = categoryFilter === 'all' || item.category_id === Number(categoryFilter);
+    const matchesStatus = statusFilter === 'all' || item.status === statusFilter;
+    return matchesSearch && matchesCategory && matchesStatus;
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h1 className="text-2xl font-bold text-dark">Menu Management</h1>
-        <button 
-          onClick={openAddModal}
-          className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors"
-        >
-          <Plus size={20} />
-          Add New Item
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={() => setIsCategoryModalOpen(true)}
+            className="bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-medium shadow-sm"
+          >
+            <Layers size={18} />
+            Categories ({categories.length})
+          </button>
+          <button 
+            onClick={openAddModal}
+            className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors text-sm font-semibold shadow-sm"
+          >
+            <Plus size={18} />
+            Add New Item
+          </button>
+        </div>
       </div>
 
       {isModalOpen && (
@@ -296,21 +342,93 @@ const Menu = () => {
         </div>
       )}
 
+      {/* Category Management Modal */}
+      {isCategoryModalOpen && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 w-full max-w-md p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-dark flex items-center gap-2">
+                <Layers size={20} className="text-primary" />
+                Manage Categories
+              </h2>
+              <button onClick={() => setIsCategoryModalOpen(false)} className="text-gray-400 hover:text-gray-600">
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddCategory} className="flex gap-2 mb-6">
+              <input
+                type="text"
+                placeholder="New category name..."
+                value={newCategoryName}
+                onChange={(e) => setNewCategoryName(e.target.value)}
+                className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+              <button
+                type="submit"
+                className="bg-primary text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-primary-dark transition-colors"
+              >
+                Add
+              </button>
+            </form>
+
+            <div className="space-y-2 max-h-60 overflow-y-auto">
+              {categories.map((cat) => (
+                <div key={cat.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
+                  <div>
+                    <span className="font-semibold text-dark text-sm">{cat.name}</span>
+                    <span className="text-xs text-gray-400 block">slug: {cat.slug}</span>
+                  </div>
+                  <button
+                    onClick={() => handleDeleteCategory(cat.id)}
+                    className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Delete Category"
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Filters */}
-        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
+        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row gap-4 justify-between items-center">
+          <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Search menu items..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              placeholder="Search dishes, ingredients..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600">
-            <Filter size={20} />
-            <span>Filter</span>
-          </button>
+          
+          <div className="flex flex-wrap gap-3 w-full md:w-auto items-center">
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+            >
+              <option value="all">All Categories ({categories.length})</option>
+              {categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              ))}
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+            >
+              <option value="all">All Statuses</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+            </select>
+          </div>
         </div>
 
         {/* Table */}
@@ -326,36 +444,60 @@ const Menu = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {items.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-dark">{item.name}</td>
-                  <td className="px-6 py-4 text-gray-500">{item.category}</td>
-                  <td className="px-6 py-4 font-medium text-dark">${item.price.toFixed(2)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      item.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
-                    }`}>
-                      {item.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <button 
-                        onClick={() => openEditModal(item)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                      >
-                        <Edit size={18} />
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(item.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
+              {filteredItems.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="px-6 py-8 text-center text-gray-400">
+                    No menu items found.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredItems.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-dark flex items-center gap-3">
+                      {item.image_url && (
+                        <img 
+                          src={item.image_url} 
+                          alt={item.name} 
+                          className="w-10 h-10 object-cover rounded-lg border border-gray-100 shrink-0" 
+                        />
+                      )}
+                      <div>
+                        <div>{item.name}</div>
+                        {item.description && (
+                          <div className="text-xs text-gray-400 max-w-xs truncate">{item.description}</div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 text-gray-500">{item.category}</td>
+                    <td className="px-6 py-4 font-medium text-dark">${item.price.toFixed(2)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        item.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button 
+                          onClick={() => openEditModal(item)}
+                          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit Item"
+                        >
+                          <Edit size={18} />
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(item.id)}
+                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete Item"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -365,3 +507,4 @@ const Menu = () => {
 };
 
 export default Menu;
+

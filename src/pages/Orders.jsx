@@ -8,20 +8,24 @@ const Orders = () => {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
   const { showToast } = useToast();
 
+  const loadOrders = async () => {
+    setLoading(true);
+    try {
+      const data = await fetchOrders();
+      setOrders(data);
+    } catch (error) {
+      console.error('Failed to load orders:', error);
+      showToast('Failed to load orders', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const loadOrders = async () => {
-        try {
-          const data = await fetchOrders();
-          setOrders(data);
-        } catch (error) {
-          console.error('Failed to load orders:', error);
-          showToast('Failed to load orders', 'error');
-        } finally {
-          setLoading(false);
-        }
-      };
     loadOrders();
   }, [showToast]);
 
@@ -64,25 +68,70 @@ const Orders = () => {
     }
   };
 
+  const filteredOrders = orders.filter(order => {
+    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !q ||
+      String(order.id).includes(q) ||
+      order.customer_name.toLowerCase().includes(q) ||
+      (order.customer_email && order.customer_email.toLowerCase().includes(q)) ||
+      order.customer_phone.includes(q) ||
+      order.delivery_address.toLowerCase().includes(q) ||
+      (order.items && order.items.some(i => (i.menu_item?.name || i.special_offer?.title || '').toLowerCase().includes(q)));
+    return matchesStatus && matchesSearch;
+  });
+
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-dark">Orders</h1>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h1 className="text-2xl font-bold text-dark">Orders</h1>
+        <button
+          onClick={loadOrders}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
+        >
+          Refresh Orders
+        </button>
+      </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         {/* Filters */}
-        <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
+        <div className="p-4 border-b border-gray-100 flex flex-col md:flex-row gap-4 justify-between items-center">
+          <div className="relative w-full md:w-80">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
             <input
               type="text"
-              placeholder="Search orders..."
-              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+              placeholder="Search by ID, customer, address..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all text-sm"
             />
           </div>
-          <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600">
-            <Filter size={20} />
-            <span>Filter Status</span>
-          </button>
+          
+          <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+            {[
+              { id: 'all', label: 'All' },
+              { id: 'pending', label: 'Pending' },
+              { id: 'cooking', label: 'Cooking' },
+              { id: 'delivered', label: 'Delivered' },
+              { id: 'cancelled', label: 'Cancelled' }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setStatusFilter(tab.id)}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
+                  statusFilter === tab.id
+                    ? 'bg-primary text-white shadow-sm'
+                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
+                }`}
+              >
+                {tab.label}
+                <span className="ml-1.5 text-xs opacity-80">
+                  ({tab.id === 'all' ? orders.length : orders.filter(o => o.status === tab.id).length})
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Table */}
@@ -100,55 +149,64 @@ const Orders = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {orders.map((order) => (
-                <tr key={order.id} className="hover:bg-gray-50 transition-colors">
-                  <td className="px-6 py-4 font-medium text-primary">#{order.id}</td>
-                  <td className="px-6 py-4 text-gray-500">{new Date(order.created_at).toLocaleDateString()}</td>
-                  <td className="px-6 py-4 font-medium text-dark">{order.customer_name}</td>
-                  <td className="px-6 py-4 text-gray-500">{order.items ? order.items.length : 0} items</td>
-                  <td className="px-6 py-4 font-bold text-dark">${Number(order.total_amount).toFixed(2)}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(order.status)}`}>
-                      {getStatusIcon(order.status)}
-                      {order.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                        <button 
-                            onClick={() => setSelectedOrder(order)}
-                            className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-primary transition-colors"
-                            title="View Details"
-                        >
-                            <Eye size={18} />
-                        </button>
-                        <div className="relative">
-                            <select 
-                                disabled={updating === order.id}
-                                className={`text-sm border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none bg-white font-medium ${
-                                    order.status === 'pending' ? 'text-yellow-700 bg-yellow-50 border-yellow-200' :
-                                    order.status === 'cooking' ? 'text-blue-700 bg-blue-50 border-blue-200' :
-                                    order.status === 'delivered' ? 'text-green-700 bg-green-50 border-green-200' :
-                                    'text-red-700 bg-red-50 border-red-200'
-                                }`}
-                                value={order.status}
-                                onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                            >
-                                <option value="pending">Pending</option>
-                                <option value="cooking">Cooking</option>
-                                <option value="delivered">Delivered</option>
-                                <option value="cancelled">Cancelled</option>
-                            </select>
-                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" size={14} />
-                        </div>
-                    </div>
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="px-6 py-8 text-center text-gray-400">
+                    No orders match your criteria.
                   </td>
                 </tr>
-              ))}
+              ) : (
+                filteredOrders.map((order) => (
+                  <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-primary">#{order.id}</td>
+                    <td className="px-6 py-4 text-gray-500">{new Date(order.created_at).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 font-medium text-dark">{order.customer_name}</td>
+                    <td className="px-6 py-4 text-gray-500">{order.items ? order.items.length : 0} items</td>
+                    <td className="px-6 py-4 font-bold text-dark">${Number(order.total_amount).toFixed(2)}</td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium capitalize ${getStatusColor(order.status)}`}>
+                        {getStatusIcon(order.status)}
+                        {order.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                          <button 
+                              onClick={() => setSelectedOrder(order)}
+                              className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 hover:text-primary transition-colors"
+                              title="View Details"
+                          >
+                              <Eye size={18} />
+                          </button>
+                          <div className="relative">
+                              <select 
+                                  disabled={updating === order.id}
+                                  className={`text-sm border border-gray-200 rounded-lg pl-3 pr-8 py-1.5 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary appearance-none bg-white font-medium ${
+                                      order.status === 'pending' ? 'text-yellow-700 bg-yellow-50 border-yellow-200' :
+                                      order.status === 'cooking' ? 'text-blue-700 bg-blue-50 border-blue-200' :
+                                      order.status === 'delivered' ? 'text-green-700 bg-green-50 border-green-200' :
+                                      'text-red-700 bg-red-50 border-red-200'
+                                  }`}
+                                  value={order.status}
+                                  onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                              >
+                                  <option value="pending">Pending</option>
+                                  <option value="cooking">Cooking</option>
+                                  <option value="delivered">Delivered</option>
+                                  <option value="cancelled">Cancelled</option>
+                              </select>
+                              <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none opacity-50" size={14} />
+                          </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </div>
+
 
       {/* Order Details Modal */}
       {selectedOrder && (

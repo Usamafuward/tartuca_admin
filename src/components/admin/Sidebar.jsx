@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   UtensilsCrossed, 
@@ -13,6 +13,13 @@ import {
 } from 'lucide-react';
 
 const Sidebar = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    navigate('/login');
+  };
+
   const navItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
     { icon: UtensilsCrossed, label: 'Menu', path: '/menu' },
@@ -27,7 +34,7 @@ const Sidebar = () => {
   return (
     <aside className="w-64 bg-white border-r border-gray-100 hidden md:flex flex-col fixed h-full z-20">
       <div className="h-20 flex items-center px-8 border-b border-gray-100">
-        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl mr-3">
+        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white font-bold text-xl mr-3 shadow-md shadow-primary/20">
           T
         </div>
         <span className="text-2xl font-bold text-dark tracking-tight">
@@ -55,7 +62,10 @@ const Sidebar = () => {
       </nav>
 
       <div className="p-4 border-t border-gray-100">
-        <button className="flex items-center gap-3 px-4 py-3 w-full text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium">
+        <button 
+          onClick={handleLogout}
+          className="flex items-center gap-3 px-4 py-3 w-full text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium"
+        >
           <LogOut size={20} />
           <span>Logout</span>
         </button>

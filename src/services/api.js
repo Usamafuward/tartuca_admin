@@ -288,3 +288,114 @@ export const updateSpecialOffer = async (id, offerData) => {
     }
 };
 
+export const fetchDashboardStats = async (token) => {
+    try {
+        const response = await fetch(`${API_URL}/dashboard/stats`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        if (!response.ok) throw new Error('Failed to fetch dashboard stats');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+        throw error;
+    }
+};
+
+export const updateReservationStatus = async (resId, status) => {
+    try {
+        const token = localStorage.getItem('adminToken');
+        const response = await fetch(`${API_URL}/reservations/${resId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status })
+        });
+        if (!response.ok) throw new Error('Failed to update reservation status');
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating reservation status:', error);
+        throw error;
+    }
+};
+
+export const fetchRestaurantSettings = async () => {
+    try {
+        const response = await fetch(`${API_URL}/settings/`);
+        if (!response.ok) throw new Error('Failed to fetch settings');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching settings:', error);
+        throw error;
+    }
+};
+
+export const updateRestaurantSettings = async (token, settingsData) => {
+    try {
+        const response = await fetch(`${API_URL}/settings/`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(settingsData)
+        });
+        if (!response.ok) throw new Error('Failed to update settings');
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating settings:', error);
+        throw error;
+    }
+};
+
+export const createCategory = async (categoryData) => {
+    try {
+        const response = await fetch(`${API_URL}/categories`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(categoryData)
+        });
+        if (!response.ok) throw new Error('Failed to create category');
+        return await response.json();
+    } catch (error) {
+        console.error('Error creating category:', error);
+        throw error;
+    }
+};
+
+export const updateCategory = async (id, categoryData) => {
+    try {
+        const response = await fetch(`${API_URL}/categories/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(categoryData)
+        });
+        if (!response.ok) throw new Error('Failed to update category');
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating category:', error);
+        throw error;
+    }
+};
+
+export const deleteCategory = async (id) => {
+    try {
+        const response = await fetch(`${API_URL}/categories/${id}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Failed to delete category');
+        return await response.json();
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        throw error;
+    }
+};
+
+
