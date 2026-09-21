@@ -1,36 +1,34 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar, Users, Clock, Mail, Phone, Check, X, Search, Filter, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { 
+  Calendar, 
+  Clock, 
+  Users, 
+  Phone, 
+  Mail, 
+  Check, 
+  X, 
+  Search, 
+  RefreshCw,
+  Sparkles,
+  AlertCircle
+} from 'lucide-react';
 import { fetchReservations, updateReservationStatus } from '../services/api';
-import { useToast } from '../context/ToastContext';
 import { ReservationsSkeleton } from '../components/common/Skeleton';
 
 const Reservations = () => {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [updatingId, setUpdatingId] = useState(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const { showToast } = useToast();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [updatingId, setUpdatingId] = useState(null);
 
   const loadReservations = async () => {
     setLoading(true);
     try {
       const data = await fetchReservations();
-      const mappedReservations = data.map(res => ({
-        id: res.id,
-        name: res.customer_name,
-        date: res.reservation_date,
-        time: res.reservation_time,
-        guests: res.party_size,
-        email: res.customer_email,
-        phone: res.customer_phone,
-        occasion: res.occasion,
-        status: res.status ? res.status.toLowerCase() : 'pending'
-      }));
-      setReservations(mappedReservations);
+      setReservations(data);
     } catch (error) {
       console.error('Failed to load reservations:', error);
-      showToast('Failed to load reservations', 'error');
     } finally {
       setLoading(false);
     }
@@ -40,17 +38,42 @@ const Reservations = () => {
     loadReservations();
   }, []);
 
-  const handleStatusUpdate = async (id, newStatus) => {
+  const handleStatusChange = async (id, newStatus) => {
     setUpdatingId(id);
     try {
       await updateReservationStatus(id, newStatus);
-      setReservations(prev => prev.map(res => res.id === id ? { ...res, status: newStatus } : res));
-      showToast(`Reservation #${id} ${newStatus === 'confirmed' ? 'confirmed' : newStatus === 'cancelled' ? 'declined' : 'updated'}`, 'success');
+      setReservations(reservations.map(res => 
+        res.id === id ? { ...res, status: newStatus } : res
+      ));
     } catch (error) {
-      console.error('Failed to update reservation status:', error);
-      showToast('Failed to update status', 'error');
+      alert('Failed to update reservation status');
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'confirmed':
+        return {
+          pill: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
+          dot: 'bg-emerald-400'
+        };
+      case 'pending':
+        return {
+          pill: 'bg-amber-500/10 text-amber-300 border border-amber-500/20',
+          dot: 'bg-amber-400'
+        };
+      case 'cancelled':
+        return {
+          pill: 'bg-rose-500/10 text-rose-400 border border-rose-500/20',
+          dot: 'bg-rose-500'
+        };
+      default:
+        return {
+          pill: 'bg-slate-800 text-slate-300 border border-slate-700',
+          dot: 'bg-slate-400'
+        };
     }
   };
 
@@ -58,176 +81,173 @@ const Reservations = () => {
     const matchesStatus = statusFilter === 'all' || res.status === statusFilter;
     const q = searchQuery.toLowerCase();
     const matchesSearch = !q || 
-      res.name.toLowerCase().includes(q) ||
-      res.email.toLowerCase().includes(q) ||
-      res.phone.includes(q) ||
+      (res.name && res.name.toLowerCase().includes(q)) ||
+      (res.email && res.email.toLowerCase().includes(q)) ||
+      (res.phone && res.phone.includes(q)) ||
       String(res.id).includes(q);
     return matchesStatus && matchesSearch;
   });
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold text-dark">Table Reservations</h1>
+        <div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Reservations</h1>
+          <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Manage table reservations, guest counts, and booking confirmations.
+          </p>
+        </div>
+
         <button
           onClick={loadReservations}
           disabled={loading}
-          className="flex items-center gap-2 px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors shadow-sm disabled:opacity-50"
+          className="inline-flex items-center gap-2 px-3.5 py-2 text-xs font-medium bg-white dark:bg-slate-900/80 hover:bg-slate-50 dark:hover:bg-slate-800 border border-slate-200 dark:border-white/[0.08] hover:border-slate-300 dark:hover:border-white/[0.15] rounded-lg text-slate-700 dark:text-slate-200 transition-all shadow-sm disabled:opacity-50 active:scale-[0.98]"
         >
-          <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
-          Refresh
+          <RefreshCw size={13} className={loading ? "animate-spin text-amber-500" : "text-slate-400"} />
+          <span>Refresh</span>
         </button>
       </div>
 
       {/* Filters & Search */}
-      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4 justify-between items-center">
+      <div className="glass-card p-4 rounded-xl border border-slate-200 dark:border-white/[0.07] flex flex-col md:flex-row gap-4 justify-between items-center shadow-xl">
         <div className="relative w-full md:w-80">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={15} />
           <input
             type="text"
-            placeholder="Search by name, email, phone..."
+            placeholder="Search reservations by name, phone..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all"
+            className="w-full pl-9 pr-4 py-2 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/[0.08] rounded-lg text-xs text-slate-900 dark:text-slate-200 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 transition-all shadow-sm"
           />
         </div>
 
-        <div className="flex gap-2 overflow-x-auto w-full md:w-auto pb-1 md:pb-0">
+        <div className="flex gap-1.5 overflow-x-auto w-full md:w-auto pb-1 md:pb-0 scrollbar-none">
           {[
-            { id: 'all', label: 'All' },
+            { id: 'all', label: 'All Reservations' },
             { id: 'pending', label: 'Pending' },
             { id: 'confirmed', label: 'Confirmed' },
-            { id: 'cancelled', label: 'Cancelled' }
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setStatusFilter(tab.id)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                statusFilter === tab.id
-                  ? 'bg-primary text-white shadow-sm'
-                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-              }`}
-            >
-              {tab.label}
-              <span className="ml-1.5 text-xs opacity-80">
-                ({tab.id === 'all' ? reservations.length : reservations.filter(r => r.status === tab.id).length})
-              </span>
-            </button>
-          ))}
+            { id: 'cancelled', label: 'Declined' }
+          ].map(tab => {
+            const count = tab.id === 'all' ? reservations.length : reservations.filter(r => r.status === tab.id).length;
+            const isActive = statusFilter === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setStatusFilter(tab.id)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap flex items-center gap-1.5 ${
+                  isActive
+                    ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40 shadow-[0_0_12px_rgba(245,158,11,0.15)]'
+                    : 'bg-slate-100 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200/70 dark:hover:bg-white/[0.04] border border-slate-200/80 dark:border-white/[0.04]'
+                }`}
+              >
+                <span>{tab.label}</span>
+                <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded-full ${
+                  isActive ? 'bg-amber-500/30 text-amber-800 dark:text-amber-200 font-bold' : 'bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-500'
+                }`}>
+                  {count}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </div>
 
+      {/* Grid of Reservation Cards */}
       {loading ? (
         <ReservationsSkeleton count={6} />
       ) : filteredReservations.length === 0 ? (
-        <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center text-gray-400">
-          <Calendar size={48} className="mx-auto mb-3 opacity-30" />
-          <p className="text-lg font-medium">No reservations found</p>
-          <p className="text-sm">Try adjusting your filters or search term.</p>
+        <div className="glass-card p-12 rounded-xl border border-slate-200 dark:border-white/[0.07] text-center text-slate-500 shadow-xl">
+          <Calendar size={40} className="mx-auto mb-3 opacity-30 text-slate-400" />
+          <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">No reservations found</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Try adjusting your search or status filter.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredReservations.map((res) => (
-            <div key={res.id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow flex flex-col justify-between">
-              <div>
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center text-primary font-bold">
-                      {res.name.charAt(0).toUpperCase()}
-                    </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredReservations.map((res) => {
+            const badge = getStatusBadge(res.status);
+            return (
+              <div 
+                key={res.id} 
+                className="glass-card p-5 rounded-xl border border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/[0.15] transition-all flex flex-col justify-between shadow-xl space-y-4"
+              >
+                <div>
+                  <div className="flex justify-between items-start mb-3">
                     <div>
-                      <h3 className="font-bold text-dark">{res.name}</h3>
-                      <p className="text-xs text-gray-500">ID: #{res.id}</p>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono text-xs font-bold text-amber-500 dark:text-amber-400">#{res.id}</span>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium capitalize ${badge.pill}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+                          {res.status}
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-slate-900 dark:text-white text-sm mt-1">{res.name}</h3>
+                    </div>
+
+                    <div className="flex items-center gap-1 px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/60 text-slate-700 dark:text-slate-300 font-mono text-xs">
+                      <Users size={12} className="text-amber-500 dark:text-amber-400" />
+                      <span>{res.guests || 2} Guests</span>
                     </div>
                   </div>
-                  <span className={`px-2.5 py-1 rounded-full text-xs font-semibold uppercase tracking-wider ${
-                    res.status === 'confirmed' ? 'bg-green-100 text-green-700' :
-                    res.status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
-                    {res.status}
-                  </span>
-                </div>
-                
-                <div className="space-y-2.5 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <Calendar size={16} className="text-gray-400 shrink-0" />
-                    <span>{res.date}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock size={16} className="text-gray-400 shrink-0" />
-                    <span>{res.time}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Users size={16} className="text-gray-400 shrink-0" />
-                    <span>{res.guests} Guests</span>
-                    {res.occasion && (
-                      <span className="text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600 ml-auto font-medium">
-                        {res.occasion}
-                      </span>
+
+                  {/* Booking details */}
+                  <div className="space-y-2 text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-[#090A0E] p-3 rounded-lg border border-slate-200 dark:border-white/[0.04]">
+                    <div className="flex items-center gap-2">
+                      <Calendar size={13} className="text-amber-500 shrink-0" />
+                      <span>{res.date ? new Date(res.date).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : 'Today'}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock size={13} className="text-amber-500 shrink-0" />
+                      <span>{res.time || '19:30'}</span>
+                    </div>
+                    {res.phone && (
+                      <div className="flex items-center gap-2">
+                        <Phone size={13} className="text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="font-mono">{res.phone}</span>
+                      </div>
+                    )}
+                    {res.email && (
+                      <div className="flex items-center gap-2">
+                        <Mail size={13} className="text-slate-400 dark:text-slate-500 shrink-0" />
+                        <span className="font-mono truncate">{res.email}</span>
+                      </div>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Mail size={16} className="text-gray-400 shrink-0" />
-                    <span className="truncate">{res.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone size={16} className="text-gray-400 shrink-0" />
-                    <span>{res.phone}</span>
-                  </div>
+
+                  {res.special_requests && (
+                    <div className="mt-3 p-2 rounded bg-amber-500/5 border border-amber-500/10 text-xs text-amber-800 dark:text-amber-200/80">
+                      <p className="font-semibold text-[10px] text-amber-600 dark:text-amber-400 uppercase tracking-wider mb-0.5">Note</p>
+                      <p className="italic">"{res.special_requests}"</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Actions */}
+                <div className="pt-3 border-t border-slate-200 dark:border-white/[0.06] flex gap-2 justify-end">
+                  {res.status !== 'confirmed' && (
+                    <button
+                      onClick={() => handleStatusChange(res.id, 'confirmed')}
+                      disabled={updatingId === res.id}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 text-emerald-300 text-xs font-medium flex items-center gap-1.5 transition-all"
+                    >
+                      <Check size={13} />
+                      <span>Confirm</span>
+                    </button>
+                  )}
+                  {res.status !== 'cancelled' && (
+                    <button
+                      onClick={() => handleStatusChange(res.id, 'cancelled')}
+                      disabled={updatingId === res.id}
+                      className="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/20 text-rose-400 text-xs font-medium flex items-center gap-1.5 transition-all"
+                    >
+                      <X size={13} />
+                      <span>Decline</span>
+                    </button>
+                  )}
                 </div>
               </div>
-
-              <div className="mt-6 pt-4 border-t border-gray-100 flex gap-2">
-                {res.status === 'pending' && (
-                  <>
-                    <button 
-                      onClick={() => handleStatusUpdate(res.id, 'confirmed')}
-                      disabled={updatingId === res.id}
-                      className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
-                    >
-                      <Check size={16} /> Confirm
-                    </button>
-                    <button 
-                      onClick={() => handleStatusUpdate(res.id, 'cancelled')}
-                      disabled={updatingId === res.id}
-                      className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
-                    >
-                      <X size={16} /> Decline
-                    </button>
-                  </>
-                )}
-                {res.status === 'confirmed' && (
-                  <>
-                    <button 
-                      onClick={() => handleStatusUpdate(res.id, 'completed')}
-                      disabled={updatingId === res.id}
-                      className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded-lg text-sm font-semibold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
-                    >
-                      <CheckCircle2 size={16} /> Mark Completed
-                    </button>
-                    <button 
-                      onClick={() => handleStatusUpdate(res.id, 'cancelled')}
-                      disabled={updatingId === res.id}
-                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
-                      title="Cancel reservation"
-                    >
-                      <X size={16} />
-                    </button>
-                  </>
-                )}
-                {res.status === 'cancelled' && (
-                  <button 
-                    onClick={() => handleStatusUpdate(res.id, 'confirmed')}
-                    disabled={updatingId === res.id}
-                    className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
-                  >
-                    Re-open & Confirm
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>
@@ -235,4 +255,3 @@ const Reservations = () => {
 };
 
 export default Reservations;
-

@@ -23,7 +23,8 @@ function App() {
           <Route path="/reservations" element={<Reservations />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/reviews" element={<Reviews />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings" element={<Settings initialTab="preferences" />} />
+          <Route path="/admin-options" element={<Settings initialTab="admin" />} />
         </Route>
       </Routes>
     </BrowserRouter>
