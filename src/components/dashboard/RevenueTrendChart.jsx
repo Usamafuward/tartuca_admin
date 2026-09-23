@@ -162,7 +162,7 @@ const RevenueTrendChart = ({
         <div className="p-2 rounded-xl bg-slate-50/60 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]">
           <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Daily Revenue Pace</p>
           <p className="text-base font-mono font-bold text-amber-600 dark:text-amber-400 mt-0.5 tnum">
-            {currency}{avgDailyRevenue.toFixed(2)}
+            {currency}{currency?.endsWith('.') ? ' ' : ''}{avgDailyRevenue.toFixed(2)}
           </p>
           <span className="text-[10px] text-slate-400 font-mono">{timeRange === '7d' ? '7-day' : '14-day'} pacing</span>
         </div>
@@ -178,7 +178,7 @@ const RevenueTrendChart = ({
         <div className="p-2 rounded-xl bg-slate-50/60 dark:bg-white/[0.02] border border-slate-200/60 dark:border-white/[0.04]">
           <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Avoidable Loss</p>
           <p className="text-base font-mono font-bold text-rose-500 dark:text-rose-400 mt-0.5 tnum">
-            {currency}{Number(cancelledRevenue || 0).toFixed(2)}
+            {currency}{currency?.endsWith('.') ? ' ' : ''}{Number(cancelledRevenue || 0).toFixed(2)}
           </p>
           <span className="text-[10px] text-slate-400 font-mono">{cancelledOrders || 0} voided orders</span>
         </div>
@@ -400,7 +400,7 @@ const RevenueTrendChart = ({
                   <span className={`w-1.5 h-1.5 rounded-full ${hasRevenue ? 'bg-amber-400' : 'bg-slate-300 dark:bg-slate-700'}`} />
                 </div>
                 <p className={`text-xs font-mono font-bold mt-1 leading-none ${hasRevenue ? 'text-amber-600 dark:text-amber-300' : 'text-slate-400'}`}>
-                  {hasRevenue ? `${currency}${Number(d.revenue).toFixed(0)}` : '$0'}
+                  {hasRevenue ? `${currency}${currency?.endsWith('.') ? ' ' : ''}${Number(d.revenue).toFixed(0)}` : `${currency}${currency?.endsWith('.') ? ' ' : ''}0`}
                 </p>
                 <span className="text-[9px] text-slate-400 dark:text-slate-500 font-mono block mt-0.5">
                   {d.orders} {d.orders === 1 ? 'ord' : 'ords'}

@@ -9,6 +9,7 @@ import Reviews from './pages/Reviews';
 import Settings from './pages/Settings';
 import Gallery from './pages/Gallery';
 import SpecialOffers from './pages/SpecialOffers';
+import Customers from './pages/Customers';
 import LoginPage from './pages/LoginPage';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/special-offers" element={<SpecialOffers />} />
           <Route path="/orders" element={<Orders />} />
           <Route path="/reservations" element={<Reservations />} />
+          <Route path="/customers" element={<Customers />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/reviews" element={<Reviews />} />
           <Route path="/settings" element={<Settings initialTab="preferences" />} />

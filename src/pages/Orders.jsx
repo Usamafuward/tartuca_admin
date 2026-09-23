@@ -18,8 +18,10 @@ import {
 import { fetchOrders, updateOrderStatus } from '../services/api';
 import { OrdersTableSkeleton } from '../components/common/Skeleton';
 import OrderStatusDropdown from '../components/admin/OrderStatusDropdown';
+import { useSettings } from '../context/SettingsContext';
 
 const Orders = () => {
+  const { formatPrice } = useSettings();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -245,7 +247,7 @@ const Orders = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 font-mono font-bold text-slate-900 dark:text-white tnum">
-                        ${Number(order.total_amount).toFixed(2)}
+                        {formatPrice(order.total_amount)}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium capitalize ${cfg.pill}`}>
@@ -400,10 +402,10 @@ const Orders = () => {
                               {item.quantity}
                             </td>
                             <td className="p-3 text-right text-slate-500 dark:text-slate-400 font-mono tnum">
-                              ${Number(item.price).toFixed(2)}
+                              {formatPrice(item.price)}
                             </td>
                             <td className="p-3 text-right font-mono font-bold text-slate-900 dark:text-white tnum">
-                              ${(Number(item.price) * Number(item.quantity)).toFixed(2)}
+                              {formatPrice(Number(item.price) * Number(item.quantity))}
                             </td>
                           </tr>
                         ))
@@ -423,7 +425,7 @@ const Orders = () => {
               <div className="p-4 bg-slate-50 dark:bg-[#090A0E] rounded-xl border border-slate-200 dark:border-white/[0.06] flex justify-between items-center">
                 <span className="text-xs uppercase font-medium text-slate-500 dark:text-slate-400">Order Total</span>
                 <span className="text-xl font-bold font-mono text-amber-600 dark:text-amber-400 tnum">
-                  ${Number(selectedOrder.total_amount).toFixed(2)}
+                  {formatPrice(selectedOrder.total_amount)}
                 </span>
               </div>
             </div>

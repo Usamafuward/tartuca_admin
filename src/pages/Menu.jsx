@@ -25,8 +25,10 @@ import {
 } from '../services/api';
 import { MenuTableSkeleton } from '../components/common/Skeleton';
 import CustomSelect from '../components/common/CustomSelect';
+import { useSettings } from '../context/SettingsContext';
 
 const Menu = () => {
+  const { currencySymbol, formatPrice } = useSettings();
   const [items, setItems] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -267,7 +269,7 @@ const Menu = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Price ($)</label>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Price ({currencySymbol})</label>
                     <input
                       type="number"
                       step="0.01"
@@ -520,7 +522,7 @@ const Menu = () => {
                         {cat?.name || 'Uncategorized'}
                       </td>
                       <td className="px-6 py-4 font-mono font-bold text-slate-900 dark:text-white tnum">
-                        ${Number(item.price).toFixed(2)}
+                        {formatPrice(item.price)}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium ${

@@ -12,6 +12,7 @@ import {
   Image,
   Radio,
   Tag,
+  Users,
   X
 } from 'lucide-react';
 
@@ -35,6 +36,7 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
       items: [
         { icon: ShoppingBag, label: 'Orders', path: '/orders' },
         { icon: CalendarDays, label: 'Reservations', path: '/reservations' },
+        { icon: Users, label: 'Customers', path: '/customers' },
         { icon: UtensilsCrossed, label: 'Menu Management', path: '/menu' },
         { icon: Tag, label: 'Special Offers', path: '/special-offers' },
       ]

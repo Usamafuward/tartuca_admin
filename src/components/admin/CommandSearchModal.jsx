@@ -16,14 +16,17 @@ import {
   ArrowRight,
   Clock,
   User,
+  Users,
   DollarSign
 } from 'lucide-react';
 import { fetchOrders, fetchMenuItems, fetchReservations } from '../../services/api';
+import { useSettings } from '../../context/SettingsContext';
 
 const staticPages = [
   { id: 'page-dashboard', title: 'Dashboard', path: '/', icon: LayoutDashboard, category: 'Pages', description: 'Overview and sales statistics' },
   { id: 'page-orders', title: 'Orders', path: '/orders', icon: ShoppingBag, category: 'Pages', description: 'Live order board and customer orders' },
   { id: 'page-reservations', title: 'Reservations', path: '/reservations', icon: CalendarDays, category: 'Pages', description: 'Table bookings and guest schedule' },
+  { id: 'page-customers', title: 'Customers', path: '/customers', icon: Users, category: 'Pages', description: 'Customer profiles, order history, and lifetime value' },
   { id: 'page-menu', title: 'Menu', path: '/menu', icon: UtensilsCrossed, category: 'Pages', description: 'Dishes, categories, and pricing' },
   { id: 'page-offers', title: 'Offers', path: '/special-offers', icon: Tag, category: 'Pages', description: 'Discounts and promotional deals' },
   { id: 'page-gallery', title: 'Gallery', path: '/gallery', icon: Image, category: 'Pages', description: 'Restaurant and food showcase photography' },
@@ -34,6 +37,7 @@ const staticPages = [
 
 const CommandSearchModal = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  const { formatPrice } = useSettings();
   const inputRef = useRef(null);
   const resultsContainerRef = useRef(null);
   
@@ -134,7 +138,7 @@ const CommandSearchModal = ({ isOpen, onClose }) => {
     ...matchedOrders.map(o => ({
       id: `order-${o.id}`,
       title: `Order #${o.id} - ${o.customer_name || 'Guest'}`,
-      description: `$${Number(o.total_amount).toFixed(2)} • ${o.status || 'pending'}`,
+      description: `${formatPrice(o.total_amount)} • ${o.status || 'pending'}`,
       path: '/orders',
       icon: ShoppingBag,
       type: 'order',
@@ -143,7 +147,7 @@ const CommandSearchModal = ({ isOpen, onClose }) => {
     ...matchedMenuItems.map(m => ({
       id: `menu-${m.id}`,
       title: m.name,
-      description: `$${Number(m.price).toFixed(2)} • ${m.status === 'out_of_stock' ? 'Out of Stock' : 'Available'}`,
+      description: `${formatPrice(m.price)} • ${m.status === 'out_of_stock' ? 'Out of Stock' : 'Available'}`,
       path: '/menu',
       icon: UtensilsCrossed,
       type: 'menu',
@@ -309,7 +313,7 @@ const CommandSearchModal = ({ isOpen, onClose }) => {
                                 Order #{order.id} <span className="font-normal text-slate-500 dark:text-slate-400">• {order.customer_name || 'Guest'}</span>
                               </p>
                               <p className="text-[11px] text-slate-500">
-                                ${Number(order.total_amount).toFixed(2)} • {order.customer_phone || 'No phone'}
+                                {formatPrice(order.total_amount)} • {order.customer_phone || 'No phone'}
                               </p>
                             </div>
                           </div>
@@ -350,7 +354,7 @@ const CommandSearchModal = ({ isOpen, onClose }) => {
                             </div>
                             <div>
                               <p className="font-semibold text-slate-900 dark:text-slate-200">{item.name}</p>
-                              <p className="text-[11px] text-slate-500 font-mono">${Number(item.price).toFixed(2)}</p>
+                              <p className="text-[11px] text-slate-500 font-mono">{formatPrice(item.price)}</p>
                             </div>
                           </div>
                           <span className={`px-2 py-0.5 rounded text-[10px] ${

@@ -2,6 +2,16 @@ const rawBaseUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_BACKEND_
 const cleanBaseUrl = rawBaseUrl.replace(/\/+$/, '');
 export const API_URL = cleanBaseUrl.endsWith('/api') ? cleanBaseUrl : `${cleanBaseUrl}/api`;
 
+export const checkAuthResponse = (response) => {
+  if (response && response.status === 401) {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminLastActivityTime');
+    if (!window.location.pathname.includes('/login')) {
+      window.location.href = '/login?expired=true';
+    }
+  }
+};
+
 export const loginAdmin = async (credentials) => {
     const formData = new FormData();
     formData.append('username', credentials.email);
@@ -45,6 +55,7 @@ export const loginAdmin = async (credentials) => {
                   'Authorization': `Bearer ${token}`
               }
           });
+          checkAuthResponse(response);
           if (!response.ok) throw new Error('Failed to fetch profile');
           return await response.json();
       } catch (error) {
@@ -346,6 +357,7 @@ export const updateRestaurantSettings = async (token, settingsData) => {
             },
             body: JSON.stringify(settingsData)
         });
+        checkAuthResponse(response);
         if (!response.ok) throw new Error('Failed to update settings');
         return await response.json();
     } catch (error) {
@@ -400,5 +412,58 @@ export const deleteCategory = async (id) => {
         throw error;
     }
 };
+
+// Customer Management
+export const fetchCustomers = async (token) => {
+    try {
+        const response = await fetch(`${API_URL}/customers`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        checkAuthResponse(response);
+        if (!response.ok) throw new Error('Failed to fetch customers');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching customers:', error);
+        throw error;
+    }
+};
+
+export const fetchCustomerDetails = async (token, customerId) => {
+    try {
+        const response = await fetch(`${API_URL}/customers/${customerId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+        checkAuthResponse(response);
+        if (!response.ok) throw new Error('Failed to fetch customer details');
+        return await response.json();
+    } catch (error) {
+        console.error('Error fetching customer details:', error);
+        throw error;
+    }
+};
+
+export const updateCustomer = async (token, customerId, data) => {
+    try {
+        const response = await fetch(`${API_URL}/customers/${customerId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(data)
+        });
+        checkAuthResponse(response);
+        if (!response.ok) throw new Error('Failed to update customer');
+        return await response.json();
+    } catch (error) {
+        console.error('Error updating customer:', error);
+        throw error;
+    }
+};
+
 
 

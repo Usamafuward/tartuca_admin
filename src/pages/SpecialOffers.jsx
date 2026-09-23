@@ -21,8 +21,10 @@ import {
   deleteSpecialOffer 
 } from '../services/api';
 import { SpecialOffersSkeleton } from '../components/common/Skeleton';
+import { useSettings } from '../context/SettingsContext';
 
 const SpecialOffers = () => {
+  const { currencySymbol, formatPrice } = useSettings();
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -235,7 +237,7 @@ const SpecialOffers = () => {
                   </div>
 
                   <div>
-                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Discounted Price ($)</label>
+                    <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">Discounted Price ({currencySymbol})</label>
                     <input
                       type="number"
                       step="0.01"
@@ -357,7 +359,7 @@ const SpecialOffers = () => {
                   <div className="flex justify-between items-baseline gap-2 mb-2">
                     <h3 className="font-bold text-white text-base leading-snug">{offer.title}</h3>
                     <span className="font-mono text-lg font-bold text-amber-400 tnum shrink-0">
-                      ${Number(offer.price).toFixed(2)}
+                      {formatPrice(offer.price)}
                     </span>
                   </div>
                   <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">

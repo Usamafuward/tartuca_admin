@@ -25,11 +25,13 @@ import { createAdmin, fetchRestaurantSettings, updateRestaurantSettings } from '
 import { SettingsSkeleton } from '../components/common/Skeleton';
 import CustomSelect from '../components/common/CustomSelect';
 import { useTheme } from '../context/ThemeContext';
+import { useSettings } from '../context/SettingsContext';
 
 const Settings = ({ initialTab = 'preferences' }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { theme, setTheme, resolvedTheme } = useTheme();
+  const { refreshSettings } = useSettings();
 
   const isExplicitAdmin = location.pathname === '/admin-options' || initialTab === 'admin';
   const [activeTab, setActiveTab] = useState(isExplicitAdmin ? 'admin' : 'preferences');
@@ -53,13 +55,13 @@ const Settings = ({ initialTab = 'preferences' }) => {
 
   const [settings, setSettings] = useState({
     name: 'Tartuca',
-    phone: '+1 (555) 123-4567',
-    email: 'admin@tartuca.com',
-    currency: 'USD ($)',
-    address: '123 Pizza Street, Foodville, FV 12345',
-    opening_hours: 'Mon-Sun: 11:00 AM - 10:00 PM',
-    delivery_fee: 5.0,
-    min_delivery_time: 30,
+    phone: '+94 11 257 4820',
+    email: 'info@tartuca.lk',
+    currency: 'LKR (Rs.)',
+    address: '42 Green Path (Ananda Coomaraswamy Mw), Colombo 07, Sri Lanka',
+    opening_hours: 'Mon-Sun: 11:30 AM - 11:00 PM',
+    delivery_fee: 350.0,
+    min_delivery_time: 25,
     max_delivery_time: 45
   });
   const [settingsLoading, setSettingsLoading] = useState(true);
@@ -115,6 +117,7 @@ const Settings = ({ initialTab = 'preferences' }) => {
       });
       setSettings(prev => ({ ...prev, ...updated }));
       setSettingsMessage({ type: 'success', text: 'System preferences saved successfully!' });
+      refreshSettings();
     } catch (err) {
       setSettingsMessage({ type: 'error', text: 'Failed to save preferences. Please try again.' });
     } finally {
@@ -384,10 +387,11 @@ const Settings = ({ initialTab = 'preferences' }) => {
                       size="lg"
                       className="!bg-[#08090C] !border-white/10 !text-slate-100"
                       options={[
-                        { value: 'USD ($)', label: 'USD ($)' },
-                        { value: 'EUR (€)', label: 'EUR (€)' },
-                        { value: 'GBP (£)', label: 'GBP (£)' },
-                        { value: 'INR (₹)', label: 'INR (₹)' }
+                        { value: 'LKR (Rs.)', label: 'LKR (Rs.) - Sri Lankan Rupee' },
+                        { value: 'USD ($)', label: 'USD ($) - US Dollar' },
+                        { value: 'EUR (€)', label: 'EUR (€) - Euro' },
+                        { value: 'GBP (£)', label: 'GBP (£) - British Pound' },
+                        { value: 'INR (₹)', label: 'INR (₹) - Indian Rupee' }
                       ]}
                     />
                   </div>
@@ -418,7 +422,7 @@ const Settings = ({ initialTab = 'preferences' }) => {
                       name="opening_hours"
                       value={settings.opening_hours} 
                       onChange={handleSettingsChange}
-                      placeholder="Mon-Sun: 11:00 AM - 10:00 PM"
+                      placeholder="Mon-Sun: 11:30 AM - 11:00 PM"
                       className="w-full px-4 py-2.5 bg-[#08090C] border border-white/10 rounded-xl text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 text-sm transition-all" 
                     />
                   </div>
@@ -426,7 +430,7 @@ const Settings = ({ initialTab = 'preferences' }) => {
                   <div className="space-y-1.5">
                     <label className="text-xs font-medium text-slate-400 flex items-center gap-1.5">
                       <DollarSign size={13} className="text-slate-500" />
-                      Delivery Fee ($)
+                      Delivery Fee ({settings.currency ? (settings.currency.includes('Rs') ? 'Rs.' : settings.currency.includes('$') ? '$' : settings.currency.includes('€') ? '€' : settings.currency.includes('£') ? '£' : '') : ''})
                     </label>
                     <input 
                       type="number" 

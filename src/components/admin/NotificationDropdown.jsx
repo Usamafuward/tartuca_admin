@@ -13,9 +13,11 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { fetchOrders, fetchReservations, fetchReviews, fetchMenuItems } from '../../services/api';
+import { useSettings } from '../../context/SettingsContext';
 
 const NotificationDropdown = ({ isOpen, onClose, onUnreadCountChange = () => {} }) => {
   const navigate = useNavigate();
+  const { formatPrice } = useSettings();
   const dropdownRef = useRef(null);
   const [activeTab, setActiveTab] = useState('all'); // 'all' | 'unread'
   const [notifications, setNotifications] = useState([]);
@@ -47,7 +49,7 @@ const NotificationDropdown = ({ isOpen, onClose, onUnreadCountChange = () => {} 
             id: `order-pending-${order.id}`,
             type: 'order',
             title: `New Order #${order.id}`,
-            message: `${order.customer_name || 'Guest'} placed an order for $${Number(order.total_amount).toFixed(2)}`,
+            message: `${order.customer_name || 'Guest'} placed an order for ${formatPrice(order.total_amount)}`,
             timestamp: order.created_at || new Date().toISOString(),
             timeAgo: 'Awaiting confirmation',
             path: '/orders',

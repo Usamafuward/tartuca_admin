@@ -139,10 +139,10 @@ const CategoryDistributionChart = ({ categories = [], currency = '$', menuStats 
                 {activeItem ? activeItem.name : 'Total Sales'}
               </span>
               <span className="text-lg font-bold font-mono text-slate-900 dark:text-white mt-0.5 tnum">
-                {activeItem ? `${activeItem.percentage}%` : `${currency}${totalRevenue.toFixed(0)}`}
+                {activeItem ? `${activeItem.percentage}%` : `${currency}${currency?.endsWith('.') ? ' ' : ''}${totalRevenue.toFixed(0)}`}
               </span>
               <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono truncate max-w-[95px]">
-                {activeItem ? `${currency}${Number(activeItem.revenue).toFixed(2)}` : `${processedData.length} Categories`}
+                {activeItem ? `${currency}${currency?.endsWith('.') ? ' ' : ''}${Number(activeItem.revenue).toFixed(2)}` : `${processedData.length} Categories`}
               </span>
             </div>
           </div>
@@ -179,7 +179,7 @@ const CategoryDistributionChart = ({ categories = [], currency = '$', menuStats 
                         {item.percentage}%
                       </span>
                       <span className="text-slate-400 dark:text-slate-500 text-[10px] tnum">
-                        {currency}{Number(item.revenue).toFixed(2)}
+                        {currency}{currency?.endsWith('.') ? ' ' : ''}{Number(item.revenue).toFixed(2)}
                       </span>
                     </div>
                   </div>

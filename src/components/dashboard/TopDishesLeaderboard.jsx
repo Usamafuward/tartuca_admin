@@ -78,7 +78,7 @@ const TopDishesLeaderboard = ({ items = [], currency = '$' }) => {
                         {item.quantity} sold
                       </span>
                       <span className="text-xs font-mono font-bold text-slate-900 dark:text-white tnum">
-                        {currency}{Number(item.revenue || 0).toFixed(2)}
+                        {currency}{currency?.endsWith('.') ? ' ' : ''}{Number(item.revenue || 0).toFixed(2)}
                       </span>
                     </div>
                   </div>

@@ -22,21 +22,15 @@ import RevenueTrendChart from '../components/dashboard/RevenueTrendChart';
 import TopDishesLeaderboard from '../components/dashboard/TopDishesLeaderboard';
 import CategoryDistributionChart from '../components/dashboard/CategoryDistributionChart';
 import OperationsSummary from '../components/dashboard/OperationsSummary';
+import { useSettings } from '../context/SettingsContext';
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { currencySymbol, formatPrice } = useSettings();
   const [statsData, setStatsData] = useState(null);
   const [recentOrders, setRecentOrders] = useState([]);
   const [restaurantSettings, setRestaurantSettings] = useState(null);
   const [loading, setLoading] = useState(true);
-
-  const currencySymbol = useMemo(() => {
-    const curr = restaurantSettings?.currency || 'USD ($)';
-    if (curr.includes('EUR') || curr.includes('€')) return '€';
-    if (curr.includes('GBP') || curr.includes('£')) return '£';
-    if (curr.includes('INR') || curr.includes('₹')) return '₹';
-    return '$';
-  }, [restaurantSettings]);
 
   const loadDashboardData = async () => {
     setLoading(true);
@@ -238,7 +232,7 @@ const Dashboard = () => {
   const stats = [
     { 
       label: 'Total Net Revenue', 
-      value: statsData ? `${currencySymbol}${Number(statsData.revenue || 0).toFixed(2)}` : `${currencySymbol}0.00`, 
+      value: statsData ? formatPrice(statsData.revenue || 0) : formatPrice(0), 
       change: '+14.2%', 
       trend: 'up', 
       icon: DollarSign, 
@@ -265,7 +259,7 @@ const Dashboard = () => {
     },
     { 
       label: 'Average Order Value', 
-      value: statsData ? `${currencySymbol}${Number(statsData.avg_order_value || 0).toFixed(2)}` : `${currencySymbol}0.00`, 
+      value: statsData ? formatPrice(statsData.avg_order_value || 0) : formatPrice(0), 
       change: '+3.8%', 
       trend: 'up', 
       icon: TrendingUp, 
@@ -471,7 +465,7 @@ const Dashboard = () => {
                           </td>
                           <td className="px-6 py-4 font-mono">
                             <span className="font-bold text-slate-900 dark:text-white tnum">
-                              {currencySymbol}{Number(order.total_amount).toFixed(2)}
+                              {formatPrice(order.total_amount)}
                             </span>
                             <span className="block text-[10px] text-slate-400 capitalize font-sans mt-0.5">
                               {order.payment_method || 'Card'}
