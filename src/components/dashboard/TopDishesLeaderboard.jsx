@@ -101,7 +101,7 @@ const TopDishesLeaderboard = ({ items = [], currency = '$' }) => {
       <div className="pt-3 border-t border-slate-100 dark:border-white/[0.06] flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
         <div className="flex items-center gap-1.5">
           <Award size={13} className="text-amber-500" />
-          <span>Top {items.length} dishes generate <strong className="text-slate-700 dark:text-slate-200 font-mono">{topDishesShare}%</strong> of volume</span>
+          <span>Top {items.length} dishes generate <strong className="text-slate-700 dark:text-slate-200 font-mono">{Number(topDishesShare).toFixed(1)}%</strong> of volume</span>
         </div>
         <span className="font-mono text-[10px] text-slate-400">Live Velocity</span>
       </div>

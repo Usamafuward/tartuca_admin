@@ -74,12 +74,16 @@ const Sidebar = ({ mobileOpen = false, onClose = () => {} }) => {
         {/* Brand Header */}
         <div className="h-18 flex items-center justify-between px-5 border-b border-slate-200/90 dark:border-white/[0.07]">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-amber-500/25 via-amber-600/10 to-transparent border border-amber-500/40 text-amber-500 dark:text-amber-400 font-bold text-lg flex items-center justify-center shadow-[0_0_15px_rgba(245,158,11,0.25)]">
-              T
+            <div className="relative w-12 h-12">
+              <img 
+                src="/tartuca-favicon.png" 
+                alt="Tartuca Emblem" 
+                className="w-full h-full object-cover" 
+              />
             </div>
-            <div>
+            <div className='space-y-0.5'>
               <div className="flex items-center gap-1.5">
-                <span className="text-sm font-semibold tracking-tight text-slate-900 dark:text-white">Tartuca</span>
+                <span className="text-md font-semibold tracking-tight text-slate-900 dark:text-white">Tartuca</span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded bg-amber-500/15 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-mono font-medium">ADMIN</span>
               </div>
               <p className="text-[10px] tracking-wide text-slate-500">Restaurant Management</p>

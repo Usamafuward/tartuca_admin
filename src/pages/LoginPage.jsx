@@ -64,8 +64,12 @@ function LoginPage() {
 
           {/* Brand & Header */}
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 via-amber-500 to-amber-600 text-obsidian-950 font-black text-2xl mx-auto flex items-center justify-center shadow-xl shadow-amber-500/25 mb-4 border border-amber-300/40">
-              T
+            <div className="relative w-16 h-16 rounded-2xl mx-auto mb-4">
+              <img 
+                src="/tartuca-favicon.png" 
+                alt="Tartuca Logo" 
+                className="w-full h-full object-cover" 
+              />
             </div>
             <h1 className="text-2xl font-black text-slate-100 tracking-tight">Tartuca Admin</h1>
             <p className="text-xs text-slate-400 mt-1.5">Sign in to manage your restaurant</p>
