@@ -3,9 +3,12 @@ import { Bell, Search, User, Menu, Clock, Sun, Moon } from 'lucide-react';
 import CommandSearchModal from './CommandSearchModal';
 import NotificationDropdown from './NotificationDropdown';
 import { useTheme } from '../../context/ThemeContext';
+import UserAvatar from '../common/UserAvatar';
+import { fetchAdminProfile } from '../../services/api';
 
 const TopBar = ({ onOpenMobileMenu = () => {} }) => {
   const [time, setTime] = useState('');
+  const [adminProfile, setAdminProfile] = useState(null);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -36,6 +39,18 @@ const TopBar = ({ onOpenMobileMenu = () => {} }) => {
     };
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, []);
+
+  // Fetch Admin Profile for portrait & name
+  useEffect(() => {
+    const token = localStorage.getItem('adminToken');
+    if (token) {
+      fetchAdminProfile(token)
+        .then(profile => {
+          if (profile) setAdminProfile(profile);
+        })
+        .catch(err => console.error('Failed to fetch admin profile in topbar:', err));
+    }
   }, []);
 
   return (
@@ -128,12 +143,18 @@ const TopBar = ({ onOpenMobileMenu = () => {} }) => {
           {/* Admin Profile Pill */}
           <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-slate-200 dark:border-white/[0.07]">
             <div className="text-right hidden xl:block">
-              <p className="text-xs font-semibold text-slate-900 dark:text-slate-200 leading-tight">Admin</p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400">Manager</p>
+              <p className="text-xs font-semibold text-slate-900 dark:text-slate-200 leading-tight">
+                {adminProfile?.full_name || 'Admin'}
+              </p>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400">Executive Manager</p>
             </div>
-            <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-700 dark:bg-gradient-to-br dark:from-slate-800 dark:to-slate-900 dark:border-slate-700 dark:text-slate-300 flex items-center justify-center text-xs font-semibold shadow-xs">
-              <User size={14} className="text-amber-700 dark:text-slate-300" />
-            </div>
+            <UserAvatar 
+              src={adminProfile?.profile_picture} 
+              name={adminProfile?.full_name || 'Admin'} 
+              size="sm" 
+              rounded="rounded-lg" 
+              className="ring-1 ring-amber-500/30 shadow-sm"
+            />
           </div>
         </div>
       </header>

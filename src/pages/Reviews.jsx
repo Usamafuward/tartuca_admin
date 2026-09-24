@@ -17,6 +17,7 @@ const Reviews = () => {
       const mappedReviews = data.map(review => ({
         id: review.id,
         user: review.author_name,
+        profile_picture: review.profile_picture || null,
         rating: review.rating,
         date: new Date(review.created_at).toLocaleDateString(undefined, {
           month: 'short',
@@ -150,8 +151,17 @@ const Reviews = () => {
               <div>
                 <div className="flex items-start justify-between gap-3 mb-3 pb-3 border-b border-white/5">
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 text-amber-400 font-black text-sm flex items-center justify-center shadow-md shadow-amber-500/10">
-                      {review.user ? review.user.charAt(0).toUpperCase() : 'C'}
+                    <div className="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-amber-500/20 to-amber-600/10 border border-amber-500/30 text-amber-400 font-black text-sm flex items-center justify-center shadow-md shadow-amber-500/10 overflow-hidden">
+                      {review.profile_picture ? (
+                        <img 
+                          src={review.profile_picture} 
+                          alt={review.user} 
+                          className="w-full h-full object-cover" 
+                          onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                        />
+                      ) : (
+                        review.user ? review.user.charAt(0).toUpperCase() : 'C'
+                      )}
                     </div>
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">

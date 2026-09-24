@@ -21,6 +21,7 @@ import {
 import { fetchCustomers, fetchCustomerDetails } from '../services/api';
 import { useSettings } from '../context/SettingsContext';
 import CustomSelect from '../components/common/CustomSelect';
+import UserAvatar from '../components/common/UserAvatar';
 
 const Customers = () => {
   const { formatPrice, currencySymbol } = useSettings();
@@ -334,9 +335,13 @@ const Customers = () => {
                       {/* Name & Avatar */}
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-9 h-9 rounded-xl border flex items-center justify-center font-bold font-mono text-xs shrink-0 ${avatarClass}`}>
-                            {initials}
-                          </div>
+                          <UserAvatar 
+                            src={cust.profile_picture} 
+                            name={cust.full_name} 
+                            id={cust.id} 
+                            size="md" 
+                            rounded="rounded-xl" 
+                          />
                           <div>
                             <p className="font-bold text-white group-hover:text-amber-400 transition-colors">
                               {cust.full_name}
@@ -419,9 +424,14 @@ const Customers = () => {
             {/* Modal Header */}
             <div className="p-6 border-b border-white/[0.08] flex justify-between items-start bg-white/[0.02]">
               <div className="flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-2xl border-2 flex items-center justify-center font-bold font-mono text-xl shrink-0 ${getAvatarBg(selectedCustomerId)}`}>
-                  {customerDetails?.customer ? getInitials(customerDetails.customer.full_name) : 'CU'}
-                </div>
+                <UserAvatar 
+                  src={customerDetails?.customer?.profile_picture} 
+                  name={customerDetails?.customer?.full_name} 
+                  id={selectedCustomerId} 
+                  size="xl" 
+                  rounded="rounded-2xl" 
+                  className="border-2 shadow-xl" 
+                />
                 <div>
                   <div className="flex items-center gap-2.5">
                     <h2 className="text-xl font-bold text-white">
@@ -682,7 +692,7 @@ const Customers = () => {
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">   
                           <div className="p-3.5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
                             <span className="text-slate-500 text-[11px] font-medium block">Full Name</span>
                             <p className="font-bold text-white text-sm mt-0.5">{customerDetails?.customer?.full_name}</p>

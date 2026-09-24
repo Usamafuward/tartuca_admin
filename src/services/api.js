@@ -465,5 +465,28 @@ export const updateCustomer = async (token, customerId, data) => {
     }
 };
 
+export const uploadCustomerAvatar = async (token, customerId, file) => {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await fetch(`${API_URL}/customers/${customerId}/avatar`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+        checkAuthResponse(response);
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            throw new Error(err.detail || 'Failed to upload customer avatar');
+        }
+        return await response.json();
+    } catch (error) {
+        console.error('Error uploading customer avatar:', error);
+        throw error;
+    }
+};
+
 
 
