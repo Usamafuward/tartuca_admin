@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { Plus, Trash2, Search, X, Image as ImageIcon, ZoomIn } from 'lucide-react';
+import { Plus, Trash2, Search, X, Image as ImageIcon, ZoomIn, RefreshCw } from 'lucide-react';
 import { fetchGallery, createGalleryImage, deleteGalleryImage, API_URL } from '../services/api';
-import { GallerySkeleton } from '../components/common/Skeleton';
 import CustomSelect from '../components/common/CustomSelect';
 
 const Gallery = () => {
@@ -320,7 +319,12 @@ const Gallery = () => {
 
       {/* Grid View for Gallery */}
       {loading ? (
-        <GallerySkeleton count={8} />
+        <div className="glass-card border border-white/5 rounded-2xl text-center py-24 text-slate-400">
+          <div className="flex flex-col items-center gap-2">
+            <RefreshCw size={24} className="animate-spin text-amber-500" />
+            <p className="text-xs">Loading photo gallery...</p>
+          </div>
+        </div>
       ) : filteredImages.length === 0 ? (
         <div className="glass-card border border-white/5 rounded-2xl text-center py-16 text-slate-400">
           <ImageIcon size={36} className="mx-auto text-slate-600 mb-3" />

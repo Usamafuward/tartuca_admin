@@ -11,7 +11,8 @@ import {
   Check, 
   AlertCircle,
   Tag,
-  DollarSign
+  DollarSign,
+  RefreshCw
 } from 'lucide-react';
 import { 
   fetchMenuItems, 
@@ -23,7 +24,6 @@ import {
   deleteCategory,
   API_URL 
 } from '../services/api';
-import { MenuTableSkeleton } from '../components/common/Skeleton';
 import CustomSelect from '../components/common/CustomSelect';
 import { useSettings } from '../context/SettingsContext';
 
@@ -195,12 +195,7 @@ const Menu = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Menu Management</h1>
-            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-300 font-semibold uppercase">
-              {items.length} Items
-            </span>
-          </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Menu Management</h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Manage dishes, prices, categories, and availability.
           </p>
@@ -471,7 +466,14 @@ const Menu = () => {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04] text-xs">
               {loading ? (
-                <MenuTableSkeleton rows={8} />
+                <tr>
+                  <td colSpan="5" className="px-6 py-12 text-center text-slate-400">
+                    <div className="flex flex-col items-center gap-2">
+                      <RefreshCw size={24} className="animate-spin text-amber-500" />
+                      <p className="text-xs">Loading menu items...</p>
+                    </div>
+                  </td>
+                </tr>
               ) : filteredItems.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="px-6 py-12 text-center text-slate-500">

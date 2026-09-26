@@ -16,7 +16,6 @@ import {
   AlertCircle 
 } from 'lucide-react';
 import { fetchOrders, updateOrderStatus } from '../services/api';
-import { OrdersTableSkeleton } from '../components/common/Skeleton';
 import OrderStatusDropdown from '../components/admin/OrderStatusDropdown';
 import { useSettings } from '../context/SettingsContext';
 
@@ -219,7 +218,14 @@ const Orders = () => {
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-white/[0.04] text-xs">
               {loading ? (
-                <OrdersTableSkeleton rows={7} />
+                <tr>
+                  <td colSpan="7" className="px-6 py-12 text-center text-slate-400">
+                    <div className="flex flex-col items-center gap-2">
+                      <RefreshCw size={24} className="animate-spin text-amber-500" />
+                      <p className="text-xs">Loading orders...</p>
+                    </div>
+                  </td>
+                </tr>
               ) : filteredOrders.length === 0 ? (
                 <tr>
                   <td colSpan="7" className="px-6 py-12 text-center text-slate-500">

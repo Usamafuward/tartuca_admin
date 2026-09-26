@@ -12,7 +12,8 @@ import {
   DollarSign, 
   Percent,
   Eye,
-  EyeOff
+  EyeOff,
+  RefreshCw
 } from 'lucide-react';
 import { 
   fetchSpecialOffers, 
@@ -20,7 +21,6 @@ import {
   updateSpecialOffer, 
   deleteSpecialOffer 
 } from '../services/api';
-import { SpecialOffersSkeleton } from '../components/common/Skeleton';
 import { useSettings } from '../context/SettingsContext';
 
 const SpecialOffers = () => {
@@ -308,7 +308,12 @@ const SpecialOffers = () => {
 
       {/* Grid of Offers */}
       {loading ? (
-        <SpecialOffersSkeleton count={4} />
+        <div className="glass-card p-16 rounded-xl border border-white/[0.07] text-center text-slate-400 shadow-xl">
+          <div className="flex flex-col items-center gap-2">
+            <RefreshCw size={24} className="animate-spin text-amber-500" />
+            <p className="text-xs">Loading promotional offers...</p>
+          </div>
+        </div>
       ) : filteredOffers.length === 0 ? (
         <div className="glass-card p-12 rounded-xl border border-white/[0.07] text-center text-slate-500 shadow-xl">
           <Tag size={40} className="mx-auto mb-3 opacity-30 text-slate-400" />

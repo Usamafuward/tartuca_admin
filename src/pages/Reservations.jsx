@@ -13,7 +13,6 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { fetchReservations, updateReservationStatus } from '../services/api';
-import { ReservationsSkeleton } from '../components/common/Skeleton';
 
 const Reservations = () => {
   const [reservations, setReservations] = useState([]);
@@ -155,7 +154,12 @@ const Reservations = () => {
 
       {/* Grid of Reservation Cards */}
       {loading ? (
-        <ReservationsSkeleton count={6} />
+        <div className="glass-card p-16 rounded-xl border border-slate-200 dark:border-white/[0.07] text-center text-slate-400 shadow-xl">
+          <div className="flex flex-col items-center gap-2">
+            <RefreshCw size={24} className="animate-spin text-amber-500" />
+            <p className="text-xs">Loading reservations...</p>
+          </div>
+        </div>
       ) : filteredReservations.length === 0 ? (
         <div className="glass-card p-12 rounded-xl border border-slate-200 dark:border-white/[0.07] text-center text-slate-500 shadow-xl">
           <Calendar size={40} className="mx-auto mb-3 opacity-30 text-slate-400" />

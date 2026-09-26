@@ -147,12 +147,7 @@ const Customers = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <div className="flex items-center gap-2.5">
-            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Customer Relationship Management</h1>
-            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-[10px] font-mono text-amber-300 font-semibold uppercase">
-              {customers.length} Registered
-            </span>
-          </div>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-white">Customer Relationship Management</h1>
           <p className="text-xs text-slate-400 mt-1">
             Browse registered diners, order histories, table reservations, lifetime spend, and delivery details.
           </p>

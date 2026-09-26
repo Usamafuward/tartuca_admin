@@ -19,10 +19,10 @@ import {
   Palette,
   Sun,
   Moon,
-  Monitor
+  Monitor,
+  RefreshCw
 } from 'lucide-react';
 import { createAdmin, fetchRestaurantSettings, updateRestaurantSettings } from '../services/api';
-import { SettingsSkeleton } from '../components/common/Skeleton';
 import CustomSelect from '../components/common/CustomSelect';
 import { useTheme } from '../context/ThemeContext';
 import { useSettings } from '../context/SettingsContext';
@@ -302,7 +302,12 @@ const Settings = ({ initialTab = 'preferences' }) => {
           </div>
 
           {settingsLoading ? (
-            <SettingsSkeleton />
+            <div className="glass-card rounded-2xl border border-white/5 p-16 text-center text-slate-400">
+              <div className="flex flex-col items-center gap-2">
+                <RefreshCw size={24} className="animate-spin text-amber-500" />
+                <p className="text-xs">Loading restaurant settings...</p>
+              </div>
+            </div>
           ) : (
             <div className="glass-card rounded-2xl border border-white/5 p-6 md:p-8 space-y-6">
               <div className="flex items-center justify-between pb-5 border-b border-white/5">

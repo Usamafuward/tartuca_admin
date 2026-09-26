@@ -17,7 +17,6 @@ import {
   fetchRestaurantSettings,
   fetchMenuItems
 } from '../services/api';
-import { DashboardSkeleton } from '../components/common/Skeleton';
 import RevenueTrendChart from '../components/dashboard/RevenueTrendChart';
 import TopDishesLeaderboard from '../components/dashboard/TopDishesLeaderboard';
 import CategoryDistributionChart from '../components/dashboard/CategoryDistributionChart';
@@ -232,39 +231,39 @@ const Dashboard = () => {
   const stats = [
     { 
       label: 'Total Net Revenue', 
-      value: statsData ? formatPrice(statsData.revenue || 0) : formatPrice(0), 
-      change: '+14.2%', 
+      value: loading ? formatPrice(0) : (statsData ? formatPrice(statsData.revenue || 0) : formatPrice(0)), 
+      change: loading ? '0%' : '+14.2%', 
       trend: 'up', 
       icon: DollarSign, 
       color: 'text-amber-500 dark:text-amber-400 bg-amber-500/10 border border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)]',
-      subtitle: 'Realized net earnings'
+      subtitle: loading ? 'Realized net earnings' : 'Realized net earnings'
     },
     { 
       label: 'Live Kitchen Queue', 
-      value: `${activeOrdersCount} Active`, 
-      change: `${pendingCount} In Queue`, 
-      trend: pendingCount > 0 ? 'alert' : 'up', 
+      value: loading ? '0 Active' : `${activeOrdersCount} Active`, 
+      change: loading ? '0 In Queue' : `${pendingCount} In Queue`, 
+      trend: (!loading && pendingCount > 0) ? 'alert' : 'up', 
       icon: ShoppingBag, 
       color: 'text-cyan-500 dark:text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]',
-      subtitle: `${cookingCount} currently cooking`
+      subtitle: loading ? '0 currently cooking' : `${cookingCount} currently cooking`
     },
     { 
       label: 'Dining Reservations', 
-      value: `${totalGuests} Guests`, 
-      change: `${pendingReservations} Needs Review`, 
-      trend: pendingReservations > 0 ? 'alert' : 'up', 
+      value: loading ? '0 Guests' : `${totalGuests} Guests`, 
+      change: loading ? '0 Pending' : `${pendingReservations} Needs Review`, 
+      trend: (!loading && pendingReservations > 0) ? 'alert' : 'up', 
       icon: CalendarDays, 
       color: 'text-emerald-500 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)]',
-      subtitle: `${statsData?.reservations_summary?.total || 0} bookings (${confirmedReservations} confirmed)`
+      subtitle: loading ? '0 bookings recorded' : `${statsData?.reservations_summary?.total || 0} bookings (${confirmedReservations} confirmed)`
     },
     { 
       label: 'Average Order Value', 
-      value: statsData ? formatPrice(statsData.avg_order_value || 0) : formatPrice(0), 
-      change: '+3.8%', 
+      value: loading ? formatPrice(0) : (statsData ? formatPrice(statsData.avg_order_value || 0) : formatPrice(0)), 
+      change: loading ? '0%' : '+3.8%', 
       trend: 'up', 
       icon: TrendingUp, 
       color: 'text-indigo-500 dark:text-indigo-400 bg-indigo-500/10 border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.15)]',
-      subtitle: 'Average spend / customer'
+      subtitle: loading ? 'Average spend / customer' : 'Average spend / customer'
     },
   ];
 
@@ -324,44 +323,49 @@ const Dashboard = () => {
         </button>
       </div>
 
+      {/* Row 1: 4 Key Performance Indicators (KPIs) - Always Visible */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {stats.map((stat, index) => (
+          <div 
+            key={index} 
+            className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/[0.15] transition-all relative overflow-hidden group shadow-lg flex flex-col justify-between"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wide uppercase">{stat.label}</p>
+                <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mt-1.5 tracking-tight tnum">{stat.value}</h3>
+              </div>
+              <div className={`p-2.5 rounded-xl ${stat.color}`}>
+                <stat.icon size={18} />
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between text-xs pt-3 border-t border-slate-100 dark:border-white/[0.04] gap-2">
+              <span className={`flex items-center gap-1 font-mono font-semibold px-1.5 py-0.5 rounded border shrink-0 ${
+                stat.trend === 'alert'
+                  ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20'
+                  : 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
+              }`}>
+                <ArrowUpRight size={12} />
+                {stat.change}
+              </span>
+              <span className="text-slate-400 dark:text-slate-500 text-[11px] truncate text-right">
+                {stat.subtitle}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {loading ? (
-        <DashboardSkeleton />
+        <div className="glass-card rounded-2xl border border-slate-200 dark:border-white/[0.08] p-24 text-center text-slate-400 shadow-xl">
+          <div className="flex flex-col items-center gap-2.5">
+            <RefreshCw size={28} className="animate-spin text-amber-500" />
+            <p className="text-xs font-medium text-slate-400">Loading restaurant analytics & overview...</p>
+          </div>
+        </div>
       ) : (
         <>
-          {/* Row 1: 4 Key Performance Indicators (KPIs) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {stats.map((stat, index) => (
-              <div 
-                key={index} 
-                className="glass-card p-5 rounded-2xl border border-slate-200 dark:border-white/[0.07] hover:border-slate-300 dark:hover:border-white/[0.15] transition-all relative overflow-hidden group shadow-lg flex flex-col justify-between"
-              >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <p className="text-slate-500 dark:text-slate-400 text-xs font-semibold tracking-wide uppercase">{stat.label}</p>
-                    <h3 className="text-2xl font-bold font-mono text-slate-900 dark:text-white mt-1.5 tracking-tight tnum">{stat.value}</h3>
-                  </div>
-                  <div className={`p-2.5 rounded-xl ${stat.color}`}>
-                    <stat.icon size={18} />
-                  </div>
-                </div>
-
-                <div className="mt-4 flex items-center justify-between text-xs pt-3 border-t border-slate-100 dark:border-white/[0.04] gap-2">
-                  <span className={`flex items-center gap-1 font-mono font-semibold px-1.5 py-0.5 rounded border shrink-0 ${
-                    stat.trend === 'alert'
-                      ? 'text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20'
-                      : 'text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20'
-                  }`}>
-                    <ArrowUpRight size={12} />
-                    {stat.change}
-                  </span>
-                  <span className="text-slate-400 dark:text-slate-500 text-[11px] truncate text-right">
-                    {stat.subtitle}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-
           {/* Row 2: Charts Section */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
             {/* 2/3 Width: Revenue & Orders Timeline Trajectory */}

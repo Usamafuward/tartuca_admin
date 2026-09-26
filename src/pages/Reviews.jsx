@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Star, MessageSquare, Check, X, Search } from 'lucide-react';
+import { Star, MessageSquare, Check, X, Search, RefreshCw } from 'lucide-react';
 import { fetchReviews, approveReview } from '../services/api';
-import { ReviewsSkeleton } from '../components/common/Skeleton';
 
 const Reviews = () => {
   const [reviews, setReviews] = useState([]);
@@ -134,7 +133,12 @@ const Reviews = () => {
 
       {/* Reviews Stream */}
       {loading ? (
-        <ReviewsSkeleton count={4} />
+        <div className="glass-card border border-white/5 rounded-2xl text-center py-20 text-slate-400">
+          <div className="flex flex-col items-center gap-2">
+            <RefreshCw size={24} className="animate-spin text-amber-500" />
+            <p className="text-xs">Loading customer reviews...</p>
+          </div>
+        </div>
       ) : filteredReviews.length === 0 ? (
         <div className="glass-card border border-white/5 rounded-2xl text-center py-16 text-slate-400">
           <MessageSquare size={36} className="mx-auto text-slate-600 mb-3" />
